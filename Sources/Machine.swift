@@ -197,7 +197,9 @@ public class Machine<S: StateType, E: EventType>
         if let toState = self.canTryEvent(event, userInfo: userInfo) {
 
             // collect valid handlers before updating state
-            let validHandlerInfos = self._validHandlerInfos(event: event, fromState: fromState, toState: toState)
+            let validHandlerInfosEvents = self._validHandlerInfos(event: event, fromState: fromState, toState: toState)
+            let validHandlerInfosStates = self._validHandlerInfos(fromState: fromState, toState: toState)
+            let validHandlerInfos = validHandlerInfosEvents + validHandlerInfosStates
 
             // update state
             self._state = toState
@@ -229,6 +231,11 @@ public class Machine<S: StateType, E: EventType>
         return validHandlerInfos.sorted { info1, info2 in
             return info1.order < info2.order
         }
+    }
+    
+    private func _validHandlerInfos(fromState: S, toState: S) -> [_HandlerInfo<S, E>]
+    {
+        return []
     }
 
     //--------------------------------------------------
