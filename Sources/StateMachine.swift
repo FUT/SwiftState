@@ -49,9 +49,9 @@ public final class StateMachine<S: StateType, E: EventType>: Machine<S, E>
         if let toState = self.canTryEvent(event, userInfo: userInfo) {
 
             // collect valid handlers before updating state
-            let validHandlerInfosEvents = self._validHandlerInfos(event: event, fromState: fromState, toState: toState)
+            let validHandlerInfos = self._validHandlerInfos(event: event, fromState: fromState, toState: toState)
             let validHandlerInfosStates = self._validHandlerInfos(fromState: fromState, toState: toState)
-            let validHandlerInfosEvents = validHandlerInfosEvents + validHandlerInfosStates
+            let validHandlerInfos = validHandlerInfosEvents + validHandlerInfosStates
             
             // update state
             self._state = toState
@@ -207,6 +207,19 @@ public final class StateMachine<S: StateType, E: EventType>: Machine<S, E>
 
         return validHandlerInfos
     }
+
+    private func _validHandlerInfos(event: E, fromState: S, toState: S) -> [_HandlerInfo<S, E>]
+    {
+        let validHandlerInfos = [ self._handlers[.some(event)], self._handlers[.any] ]
+            .filter { $0 != nil }
+            .map { $0! }
+            .joined()
+
+        return validHandlerInfos.sorted { info1, info2 in
+            return info1.order < info2.order
+        }
+    }
+
 
     //--------------------------------------------------
     // MARK: - Route
