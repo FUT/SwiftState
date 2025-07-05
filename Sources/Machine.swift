@@ -14,7 +14,7 @@
 /// This class can be used as a safe state-container in similar way as [rackt/Redux](https://github.com/rackt/redux),
 /// where `RouteMapping` can be interpretted as `Redux.Reducer`.
 ///
-public class Machine<S: StateType, E: EventType>
+open class Machine<S: StateType, E: EventType>
 {
     /// Closure argument for `Condition` & `Handler`.
     public struct Context
