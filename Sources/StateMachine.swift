@@ -477,6 +477,48 @@ public final class StateMachine<S: StateType, E: EventType>: Machine<S, E>
     }
 
     //--------------------------------------------------
+    // MARK: - tryEvent Override
+    //--------------------------------------------------
+    
+    @discardableResult
+    public override func tryEvent(_ event: E, userInfo: Any? = nil) -> Bool
+    {
+        let fromState = self.state
+        
+        if let toState = self.canTryEvent(event, userInfo: userInfo) {
+            
+            // collect valid event handlers from base class
+            let validEventHandlerInfos = super._validHandlerInfos(event: event, fromState: fromState, toState: toState)
+            
+            // collect valid state transition handlers
+            let validTransitionHandlerInfos = self._validHandlerInfos(fromState: fromState, toState: toState)
+            
+            // combine both handler lists and sort by order
+            let allHandlerInfos = (validEventHandlerInfos + validTransitionHandlerInfos).sorted { info1, info2 in
+                return info1.order < info2.order
+            }
+            
+            // update state
+            self._state = toState
+            
+            // perform all handlers after updating state
+            for handlerInfo in allHandlerInfos {
+                handlerInfo.handler(Context(event: event, fromState: fromState, toState: toState, userInfo: userInfo))
+            }
+            
+            return true
+        }
+        else {
+            for handlerInfo in self._errorHandlers {
+                let toState = self.state    // NOTE: there's no `toState` for failure of event-based-transition
+                handlerInfo.handler(Context(event: event, fromState: fromState, toState: toState, userInfo: userInfo))
+            }
+            
+            return false
+        }
+    }
+    
+    //--------------------------------------------------
     // MARK: - StateRouteMapping
     //--------------------------------------------------
 

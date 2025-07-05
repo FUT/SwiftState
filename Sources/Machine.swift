@@ -219,7 +219,7 @@ public class Machine<S: StateType, E: EventType>
         }
     }
 
-    private func _validHandlerInfos(event: E, fromState: S, toState: S) -> [_HandlerInfo<S, E>]
+    internal func _validHandlerInfos(event: E, fromState: S, toState: S) -> [_HandlerInfo<S, E>]
     {
         let validHandlerInfos = [ self._handlers[.some(event)], self._handlers[.any] ]
             .filter { $0 != nil }
